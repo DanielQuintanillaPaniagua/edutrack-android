@@ -17,9 +17,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://mobile.maven.couchbase.com/maven2/dev/") }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "EduTrack"
 include(":app")
- 
