@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EduTrack">
         <activity
+            android:name=".edutrack.ui.RegistroActivity"
+            android:exported="false" />
+        <activity
             android:name=".edutrack.ui.DashboardDocenteActivity"
             android:exported="false" />
         <activity
