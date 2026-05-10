@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +23,6 @@ public class LoginActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
-        // Si ya hay sesión activa, ir directo al dashboard
         if (dbHelper.haySesionActiva()) {
             irAlDashboard();
             return;
@@ -33,23 +30,16 @@ public class LoginActivity extends AppCompatActivity {
 
         Button btnLogin = findViewById(R.id.btnLogin);
         TextView tvRegistrate = findViewById(R.id.tvRegistro);
+
         tvRegistrate.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegistroActivity.class);
             startActivity(intent);
         });
 
         btnLogin.setOnClickListener(v -> {
-            // Por ahora guardamos datos de prueba
-            // Después esto vendrá de CouchDB
-            dbHelper.guardarSesion(
-                    "Ana García",
-                    "ana.garcia@ugb.edu.sv",
-                    "docente",
-                    "DOC-001"
-            );
-
-            Toast.makeText(this, "¡Bienvenida, Ana García!", Toast.LENGTH_SHORT).show();
-            irAlDashboard();
+            Intent intent = new Intent(LoginActivity.this, LoginFormActivity.class);
+            intent.putExtra("rol", "docente");
+            startActivity(intent);
         });
     }
 
