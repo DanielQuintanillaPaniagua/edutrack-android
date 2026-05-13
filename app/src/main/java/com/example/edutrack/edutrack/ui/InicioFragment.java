@@ -19,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import android.content.Intent;
+import com.example.edutrack.edutrack.ui.GenerarQRActivity;
 
 public class InicioFragment extends Fragment {
 
@@ -59,6 +61,8 @@ public class InicioFragment extends Fragment {
                     View card = crearTarjetaMateria(inflater, materia);
                     llMaterias.addView(card);
                 }
+                view.findViewById(R.id.cardGenerarQR).setOnClickListener(v ->
+                        startActivity(new Intent(getActivity(), GenerarQRActivity.class)));
             }
         }
 

@@ -75,8 +75,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <!-- Botón Escanear QR -->
+            <!-- Botón generar QR -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardGenerarQR"
                 android:layout_width="0dp"
                 android:layout_height="80dp"
                 android:layout_weight="1"
@@ -100,7 +101,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Escanear QR"
+                        android:text="Gnerar QR"
                         android:textColor="#FFFFFF"
                         android:textSize="12sp"/>
                 </LinearLayout>

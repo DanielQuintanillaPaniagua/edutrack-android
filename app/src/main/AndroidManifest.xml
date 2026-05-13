@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EduTrack">
+        <activity android:name=".edutrack.ui.GenerarQRActivity"/>
         <activity
             android:name=".edutrack.ui.LoginFormActivity"
             android:exported="false" />

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.edutrack.edutrack.models.Materia;
 import com.example.edutrack.edutrack.models.Usuario;
+import com.example.edutrack.edutrack.models.Asistencia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +16,12 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "edutrack.db";
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 7;
 
     private static final String TABLE_SESION = "sesion";
     private static final String TABLE_USUARIOS = "usuarios";
     private static final String TABLE_MATERIAS = "materias";
+    private static final String TABLE_ASISTENCIA = "asistencia";
 
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -54,6 +56,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "descripcion TEXT," +
                 "docente_id  INTEGER," +
                 "FOREIGN KEY (docente_id) REFERENCES " + TABLE_USUARIOS + "(id) ON DELETE CASCADE)");
+
+        db.execSQL("CREATE TABLE " + TABLE_ASISTENCIA + " (" +
+                "id          INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "materia_id  INTEGER," +
+                "fecha       TEXT," +
+                "hora        TEXT," +
+                "total       INTEGER DEFAULT 0," +
+                "presentes   INTEGER DEFAULT 0," +
+                "FOREIGN KEY (materia_id) REFERENCES " + TABLE_MATERIAS + "(id))");
     }
 
     // ══════════════════════════════════════════
@@ -77,6 +88,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     "descripcion TEXT," +
                     "docente_id  INTEGER," +
                     "FOREIGN KEY (docente_id) REFERENCES " + TABLE_USUARIOS + "(id) ON DELETE CASCADE)");
+        }
+        if (oldVersion < 6) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_ASISTENCIA + " (" +
+                    "id          INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "materia_id  INTEGER," +
+                    "fecha       TEXT," +
+                    "hora        TEXT," +
+                    "total       INTEGER DEFAULT 0," +
+                    "presentes   INTEGER DEFAULT 0," +
+                    "FOREIGN KEY (materia_id) REFERENCES " + TABLE_MATERIAS + "(id))");
         }
     }
 
@@ -236,5 +257,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("password", nuevaPassword);
         db.update(TABLE_USUARIOS, values, "correo = ?", new String[]{correo});
         db.close();
+    }
+    public long registrarAsistencia(int materiaId, String fecha,
+                                    String hora, int total, int presentes) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("materia_id", materiaId);
+        v.put("fecha",      fecha);
+        v.put("hora",       hora);
+        v.put("total",      total);
+        v.put("presentes",  presentes);
+        long id = db.insert(TABLE_ASISTENCIA, null, v);
+        db.close();
+        return id;
+    }
+
+    public List<Asistencia> obtenerHistorialPorDocente(int docenteId) {
+        List<Asistencia> lista = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT a.*, m.nombre as materia_nombre " +
+                        "FROM " + TABLE_ASISTENCIA + " a " +
+                        "INNER JOIN " + TABLE_MATERIAS + " m ON a.materia_id = m.id " +
+                        "WHERE m.docente_id = ? " +
+                        "ORDER BY a.fecha DESC, a.hora DESC",
+                new String[]{String.valueOf(docenteId)});
+        if (cursor.moveToFirst()) {
+            do {
+                Asistencia a = new Asistencia();
+                a.setId(cursor.getInt(cursor.getColumnIndexOrThrow("id")));
+                a.setMateriaId(cursor.getInt(cursor.getColumnIndexOrThrow("materia_id")));
+                a.setMateriaNombre(cursor.getString(cursor.getColumnIndexOrThrow("materia_nombre")));
+                a.setFecha(cursor.getString(cursor.getColumnIndexOrThrow("fecha")));
+                a.setHora(cursor.getString(cursor.getColumnIndexOrThrow("hora")));
+                a.setTotal(cursor.getInt(cursor.getColumnIndexOrThrow("total")));
+                a.setPresentes(cursor.getInt(cursor.getColumnIndexOrThrow("presentes")));
+                lista.add(a);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return lista;
     }
 }
