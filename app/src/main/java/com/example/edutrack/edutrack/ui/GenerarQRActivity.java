@@ -14,8 +14,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Materia;
 import com.example.edutrack.edutrack.models.Usuario;
@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import com.example.edutrack.edutrack.database.FirebaseManager;
+
 
 public class GenerarQRActivity extends AppCompatActivity {
 
@@ -147,9 +149,17 @@ public class GenerarQRActivity extends AppCompatActivity {
             tvTemporizador.setVisibility(View.VISIBLE);
 
             // Registrar en BD
-            dbHelper.registrarAsistencia(
+            long asistenciaId = dbHelper.registrarAsistencia(
                     materiaSeleccionada.getId(), fecha, hora, 0, 0);
 
+// ✅ Sincronizar con Firebase
+            FirebaseManager.sincronizarAsistencia(
+                    asistenciaId,
+                    materiaSeleccionada.getId(),
+                    fecha,
+                    hora,
+                    0,
+                    0);
             // Temporizador de 5 minutos
             iniciarTemporizador();
 

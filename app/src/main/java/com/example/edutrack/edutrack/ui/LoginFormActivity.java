@@ -10,8 +10,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.edutrack.R;
+import com.example.edutrack.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
+import com.example.edutrack.edutrack.database.FirebaseManager;
 
 public class LoginFormActivity extends AppCompatActivity {
 
@@ -27,12 +28,11 @@ public class LoginFormActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login_form);
 
         dbHelper = new DatabaseHelper(this);
-
-        etCorreo   = findViewById(R.id.etCorreo);
-        etPassword = findViewById(R.id.etPassword);
-        btnIngresar  = findViewById(R.id.btnIngresar);
-        tvRolTitulo  = findViewById(R.id.tvRolTitulo);
-        tvVolver     = findViewById(R.id.tvVolver);
+        etCorreo    = findViewById(R.id.etCorreo);
+        etPassword  = findViewById(R.id.etPassword);
+        btnIngresar = findViewById(R.id.btnIngresar);
+        tvRolTitulo = findViewById(R.id.tvRolTitulo);
+        tvVolver    = findViewById(R.id.tvVolver);
 
         rolSeleccionado = getIntent().getStringExtra("rol");
         tvRolTitulo.setText("Iniciar sesión como " +
@@ -48,32 +48,53 @@ public class LoginFormActivity extends AppCompatActivity {
                 return;
             }
 
-            if (dbHelper.verificarCredenciales(correo, password)) {
-                Cursor cursor = dbHelper.obtenerUsuario(correo);
-                if (cursor.moveToFirst()) {
-                    int    id     = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-                    String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
-                    String rol    = cursor.getString(cursor.getColumnIndexOrThrow("rol"));
-                    String carnet = cursor.getString(cursor.getColumnIndexOrThrow("carnet"));
-
-                    dbHelper.guardarSesion(id, nombre, correo, rol, carnet);
-
-                    Toast.makeText(this, "¡Bienvenido, " + nombre + "!",
-                            Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(LoginFormActivity.this,
-                            DashboardDocenteActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-                cursor.close();
-            } else {
-                Toast.makeText(this, "Correo o contraseña incorrectos",
-                        Toast.LENGTH_SHORT).show();
-            }
+            // Intentar login con Firebase primero
+            FirebaseManager.loginUsuario(correo, password,
+                    new FirebaseManager.AuthCallback() {
+                        @Override
+                        public void onSuccess(String uid) {
+                            // Firebase OK → procesar sesión local
+                            procesarLoginLocal(correo, password);
+                        }
+                        @Override
+                        public void onError(String error) {
+                            // Sin conexión o error → fallback a SQLite
+                            procesarLoginLocal(correo, password);
+                        }
+                    });
         });
 
         tvVolver.setOnClickListener(v -> finish());
+    }
+
+    private void procesarLoginLocal(String correo, String password) {
+        if (dbHelper.verificarCredenciales(correo, password)) {
+            Cursor cursor = dbHelper.obtenerUsuario(correo);
+            if (cursor.moveToFirst()) {
+                int    id     = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+                String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+                String rol    = cursor.getString(cursor.getColumnIndexOrThrow("rol"));
+                String carnet = cursor.getString(cursor.getColumnIndexOrThrow("carnet"));
+                cursor.close();
+
+                dbHelper.guardarSesion(id, nombre, correo, rol, carnet);
+                Toast.makeText(this, "¡Bienvenido, " + nombre + "!",
+                        Toast.LENGTH_SHORT).show();
+
+                Class<?> destino = rol.equals("docente")
+                        ? DashboardDocenteActivity.class
+                        : DashboardEstudianteActivity.class;
+
+                Intent intent = new Intent(LoginFormActivity.this, destino);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            } else {
+                cursor.close();
+            }
+        } else {
+            Toast.makeText(this, "Correo o contraseña incorrectos",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }

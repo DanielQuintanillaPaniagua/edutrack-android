@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_inicio_est"
+        android:icon="@drawable/ic_home"
+        android:title="Inicio" />
+
+    <item
+        android:id="@+id/nav_materias_est"
+        android:icon="@drawable/ic_book"
+        android:title="Materias" />
+
+    <!-- Espacio para el FAB — nunca carga fragment -->
+    <item
+        android:id="@+id/nav_fab_space"
+        android:icon="@drawable/ic_qr"
+        android:title=""
+        android:enabled="false" />
+
+    <item
+        android:id="@+id/nav_asistencia_est"
+        android:icon="@drawable/ic_statistics"
+        android:title="Asistencia" />
+
+    <item
+        android:id="@+id/nav_perfil_est"
+        android:icon="@drawable/ic_person"
+        android:title="Perfil" />
+
+</menu>

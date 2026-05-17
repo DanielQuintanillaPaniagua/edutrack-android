@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.example.edutrack.edutrack.models.Materia;
 
 import java.util.List;

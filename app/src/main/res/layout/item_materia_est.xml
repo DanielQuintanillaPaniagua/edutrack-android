@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#1A2C3D">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Nombre y porcentaje -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvNombreMateria"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Materia"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvPorcentaje"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#4CAF50"/>
+
+        </LinearLayout>
+
+        <!-- Barra de progreso -->
+        <ProgressBar
+            android:id="@+id/progressAsistencia"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#4CAF50"
+            android:progressBackgroundTint="#2C3E50"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Clases asistidas / totales -->
+        <TextView
+            android:id="@+id/tvClasesDetalle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0/0 clases"
+            android:textColor="#B0BEC5"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

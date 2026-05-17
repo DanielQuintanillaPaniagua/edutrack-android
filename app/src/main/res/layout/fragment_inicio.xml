@@ -109,6 +109,7 @@
 
             <!-- Botón Ver estudiantes -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardVerEstudiantes"
                 android:layout_width="0dp"
                 android:layout_height="80dp"
                 android:layout_weight="1"

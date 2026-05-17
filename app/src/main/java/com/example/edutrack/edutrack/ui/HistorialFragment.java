@@ -11,8 +11,8 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.example.edutrack.edutrack.adapters.HistorialAdapter;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Asistencia;

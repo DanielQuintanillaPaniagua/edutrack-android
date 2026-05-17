@@ -13,12 +13,14 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.example.edutrack.edutrack.adapters.MateriaAdapter;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Materia;
 import com.example.edutrack.edutrack.models.Usuario;
+import com.example.edutrack.edutrack.database.FirebaseManager;
+
 
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class MateriasFragment extends Fragment implements MateriaAdapter.OnMater
     private List<Materia> listaMaterias;
     private int docenteId;
 
-    public MateriasFragment() {}
+    public MateriasFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -97,9 +100,20 @@ public class MateriasFragment extends Fragment implements MateriaAdapter.OnMater
             if (id > 0) {
                 nueva.setId((int) id);
                 adapter.agregar(nueva);
+
+                // ✅ Sincronizar con Firebase
+                FirebaseManager.sincronizarMateria(
+                        (int) id,
+                        nueva.getNombre(),
+                        nueva.getCodigo(),
+                        nueva.getDescripcion(),
+                        docenteId,
+                        null);
+
                 Toast.makeText(getContext(), "✅ Materia agregada",
                         Toast.LENGTH_SHORT).show();
             }
+
         });
 
         builder.setNegativeButton("Cancelar", null);
@@ -124,6 +138,45 @@ public class MateriasFragment extends Fragment implements MateriaAdapter.OnMater
 
     @Override
     public void onClickMateria(Materia materia) {
-        Toast.makeText(getContext(), materia.getNombre(), Toast.LENGTH_SHORT).show();
+        List<Usuario> estudiantes = dbHelper.obtenerTodosLosEstudiantes();
+
+        if (estudiantes.isEmpty()) {
+            Toast.makeText(getContext(),
+                    "No hay estudiantes registrados", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] nombres = new String[estudiantes.size()];
+        boolean[] inscritos = new boolean[estudiantes.size()];
+
+        for (int i = 0; i < estudiantes.size(); i++) {
+            nombres[i] = estudiantes.get(i).getNombre() +
+                    " (" + estudiantes.get(i).getCarnet() + ")";
+            inscritos[i] = dbHelper.estaInscrito(
+                    estudiantes.get(i).getId(), materia.getId());
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Estudiantes — " + materia.getNombre())
+                .setMultiChoiceItems(nombres, inscritos, (dialog, which, isChecked) -> {
+                    int estudianteId = estudiantes.get(which).getId();
+                    if (isChecked) {
+                        dbHelper.inscribirEstudiante(estudianteId, materia.getId());
+
+                        // ✅ Firebase — dentro del lambda
+                        FirebaseManager.sincronizarInscripcion(estudianteId, materia.getId());
+
+                        Toast.makeText(getContext(),
+                                nombres[which].split(" \\(")[0] + " inscrito ✅",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        dbHelper.desinscribirEstudiante(estudianteId, materia.getId());
+                        Toast.makeText(getContext(),
+                                nombres[which].split(" \\(")[0] + " desinscrito",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setPositiveButton("Listo", null)
+                .show();
     }
 }

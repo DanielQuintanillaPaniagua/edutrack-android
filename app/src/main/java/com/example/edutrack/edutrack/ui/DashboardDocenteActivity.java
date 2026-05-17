@@ -4,9 +4,11 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.edutrack.edutrack.database.FirebaseManager;
+
 
 public class DashboardDocenteActivity extends AppCompatActivity {
 
@@ -16,6 +18,8 @@ public class DashboardDocenteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard_docente);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        // Descargar estudiantes de Firebase al iniciar
+        FirebaseManager.descargarEstudiantes(this, null);
 
         // Carga el fragment de inicio por defecto
         cargarFragment(new InicioFragment());

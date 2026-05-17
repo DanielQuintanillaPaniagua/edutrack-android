@@ -11,8 +11,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.edutrack.R;
+import com.example.edutrack.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
+import com.example.edutrack.edutrack.database.FirebaseManager;
 
 public class RegistroActivity extends AppCompatActivity {
 
@@ -27,8 +28,7 @@ public class RegistroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registro);
 
-        dbHelper = new DatabaseHelper(this);
-
+        dbHelper        = new DatabaseHelper(this);
         etNombre        = findViewById(R.id.etNombre);
         etCorreo        = findViewById(R.id.etCorreo);
         etCarnet        = findViewById(R.id.etCarnet);
@@ -49,22 +49,17 @@ public class RegistroActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (password.length() < 6) {
                 Toast.makeText(this, "La contraseña debe tener mínimo 6 caracteres",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (rgRol.getCheckedRadioButtonId() == -1) {
-                Toast.makeText(this, "Selecciona un rol",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
+            android.widget.RadioButton rbEstudiante = findViewById(R.id.rbEstudiante);
+            String rol = (rbEstudiante != null && rbEstudiante.isChecked())
+                    ? "estudiante" : "docente";
 
-            String rol = rgRol.getCheckedRadioButtonId() == R.id.rbDocente
-                    ? "docente" : "estudiante";
-
+            // 1. Guardar en SQLite local
             dbHelper.registrarUsuario(nombre, correo, password, rol, carnet);
 
             if (!dbHelper.verificarCredenciales(correo, password)) {
@@ -73,21 +68,37 @@ public class RegistroActivity extends AppCompatActivity {
                 return;
             }
 
-            // Obtener el id generado por SQLite
+            // 2. Guardar sesión local
             Cursor cursor = dbHelper.obtenerUsuario(correo);
             if (cursor.moveToFirst()) {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
-                dbHelper.guardarSesion(id, nombre, correo, rol, carnet); // ← fix
+                dbHelper.guardarSesion(id, nombre, correo, rol, carnet);
             }
             cursor.close();
+
+            // 3. Sincronizar con Firebase (en segundo plano)
+            String rolFinal = rol;
+            FirebaseManager.registrarUsuario(nombre, correo, password, rol, carnet,
+                    new FirebaseManager.AuthCallback() {
+                        @Override
+                        public void onSuccess(String uid) {
+                            // Sincronizado en Firebase ✅
+                        }
+                        @Override
+                        public void onError(String error) {
+                            // Falla Firebase pero SQLite ya guardó — app funciona igual
+                        }
+                    });
 
             Toast.makeText(this, "¡Cuenta creada! Bienvenido, " + nombre,
                     Toast.LENGTH_SHORT).show();
 
-            Intent intent = new Intent(RegistroActivity.this,
-                    DashboardDocenteActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Class<?> destino = "docente".equals(rol)
+                    ? DashboardDocenteActivity.class
+                    : DashboardEstudianteActivity.class;
+
+            Intent intent = new Intent(RegistroActivity.this, destino);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
 

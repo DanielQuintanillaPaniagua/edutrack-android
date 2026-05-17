@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,28 +14,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EduTrack">
-        <activity android:name=".edutrack.ui.GenerarQRActivity"/>
+
+        <activity android:name=".ui.EscanerQRActivity"           android:exported="false" />
+        <activity android:name=".ui.DashboardEstudianteActivity"  android:exported="false" />
+        <activity android:name=".ui.GenerarQRActivity"            android:exported="false" />
+        <activity android:name=".ui.LoginFormActivity"            android:exported="false" />
+        <activity android:name=".ui.RegistroActivity"             android:exported="false" />
+        <activity android:name=".ui.DashboardDocenteActivity"     android:exported="false" />
+        <activity android:name=".MainActivity"                    android:exported="false" />
+
         <activity
-            android:name=".edutrack.ui.LoginFormActivity"
-            android:exported="false" />
-        <activity
-            android:name=".edutrack.ui.RegistroActivity"
-            android:exported="false" />
-        <activity
-            android:name=".edutrack.ui.DashboardDocenteActivity"
-            android:exported="false" />
-        <activity
-            android:name=".edutrack.ui.LoginActivity"
+            android:name=".ui.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+
     </application>
 
 </manifest>

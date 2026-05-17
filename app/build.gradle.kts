@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.edutrack"
+    namespace = "com.example.edutrack.edutrack"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.edutrack"
+        applicationId = "com.example.edutrack.edutrack"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -40,7 +41,12 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    // implementation("com.couchbase.lite:couchbase-lite-android-community:3.1.0")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

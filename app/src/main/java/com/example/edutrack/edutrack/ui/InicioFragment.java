@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import com.example.edutrack.edutrack.R;
 
-import com.example.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Materia;
 import com.example.edutrack.edutrack.models.Usuario;
@@ -63,6 +63,8 @@ public class InicioFragment extends Fragment {
                 }
                 view.findViewById(R.id.cardGenerarQR).setOnClickListener(v ->
                         startActivity(new Intent(getActivity(), GenerarQRActivity.class)));
+                view.findViewById(R.id.cardVerEstudiantes).setOnClickListener(v ->
+                        mostrarEstudiantes(dbHelper));
             }
         }
 
@@ -127,5 +129,34 @@ public class InicioFragment extends Fragment {
         card.addView(row);
 
         return card;
+    }
+    private void mostrarEstudiantes(DatabaseHelper db) {
+        List<Usuario> estudiantes = db.obtenerTodosLosEstudiantes();
+
+        if (estudiantes.isEmpty()) {
+            new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Estudiantes")
+                    .setMessage("No hay estudiantes registrados aún.")
+                    .setPositiveButton("Cerrar", null)
+                    .show();
+            return;
+        }
+
+        // Construir lista con nombre + carnet
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < estudiantes.size(); i++) {
+            Usuario u = estudiantes.get(i);
+            sb.append(i + 1).append(". ")
+                    .append(u.getNombre())
+                    .append("\n   Carnet: ").append(u.getCarnet())
+                    .append("\n   ").append(u.getCorreo());
+            if (i < estudiantes.size() - 1) sb.append("\n\n");
+        }
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("👥 Estudiantes (" + estudiantes.size() + ")")
+                .setMessage(sb.toString())
+                .setPositiveButton("Cerrar", null)
+                .show();
     }
 }
