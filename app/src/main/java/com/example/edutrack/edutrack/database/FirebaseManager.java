@@ -11,7 +11,6 @@ public class FirebaseManager {
     private static final FirebaseAuth auth = FirebaseAuth.getInstance();
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    // ── Interfaces callback ──────────────────────────
     public interface AuthCallback {
         void onSuccess(String uid);
         void onError(String error);
@@ -31,14 +30,11 @@ public class FirebaseManager {
         auth.createUserWithEmailAndPassword(correo, password)
                 .addOnSuccessListener(result -> {
                     String uid = result.getUser().getUid();
-
-                    // Guardar perfil en Firestore
                     Map<String, Object> usuario = new HashMap<>();
                     usuario.put("nombre", nombre);
                     usuario.put("correo", correo);
                     usuario.put("rol",    rol);
                     usuario.put("carnet", carnet);
-
                     db.collection("usuarios").document(uid)
                             .set(usuario)
                             .addOnSuccessListener(v -> callback.onSuccess(uid))
@@ -70,7 +66,6 @@ public class FirebaseManager {
         data.put("codigo",      codigo);
         data.put("descripcion", descripcion);
         data.put("docente_id",  docenteId);
-
         db.collection("materias").document(String.valueOf(materiaId))
                 .set(data)
                 .addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(); })
@@ -89,9 +84,7 @@ public class FirebaseManager {
         data.put("hora",       hora);
         data.put("total",      total);
         data.put("presentes",  presentes);
-
-        db.collection("asistencia").document(String.valueOf(asistenciaId))
-                .set(data);
+        db.collection("asistencia").document(String.valueOf(asistenciaId)).set(data);
     }
 
     // ══════════════════════════════════════════════
@@ -103,27 +96,24 @@ public class FirebaseManager {
                                                        String hora,
                                                        String estado) {
         String docId = estudianteId + "_" + materiaId + "_" + fecha;
-
         Map<String, Object> data = new HashMap<>();
         data.put("estudiante_id", estudianteId);
         data.put("materia_id",    materiaId);
         data.put("fecha",         fecha);
         data.put("hora",          hora);
         data.put("estado",        estado);
-
         db.collection("asistencia_estudiante").document(docId).set(data);
     }
 
     // ══════════════════════════════════════════════
-    //  FIRESTORE — Sincronizar inscripción
+    //  FIRESTORE — Sincronizar inscripción (por correo)
     // ══════════════════════════════════════════════
-    public static void sincronizarInscripcion(int estudianteId, int materiaId) {
-        String docId = estudianteId + "_" + materiaId;
-
+    public static void sincronizarInscripcion(int estudianteId, int materiaId,
+                                              String correoEstudiante) {
+        String docId = correoEstudiante.replace(".", "_") + "_" + materiaId;
         Map<String, Object> data = new HashMap<>();
-        data.put("estudiante_id", estudianteId);
-        data.put("materia_id",    materiaId);
-
+        data.put("correo_estudiante", correoEstudiante);
+        data.put("materia_id",        materiaId);
         db.collection("inscripciones").document(docId).set(data);
     }
 
@@ -137,13 +127,13 @@ public class FirebaseManager {
     public static boolean hayUsuarioActivo() {
         return auth.getCurrentUser() != null;
     }
+
     // ══════════════════════════════════════════════
-//  FIRESTORE — Descargar estudiantes al SQLite local
-// ══════════════════════════════════════════════
+    //  FIRESTORE — Descargar estudiantes
+    // ══════════════════════════════════════════════
     public static void descargarEstudiantes(android.content.Context context,
                                             SyncCallback callback) {
         DatabaseHelper localDb = new DatabaseHelper(context);
-
         db.collection("usuarios")
                 .whereEqualTo("rol", "estudiante")
                 .get()
@@ -152,12 +142,125 @@ public class FirebaseManager {
                         String nombre = doc.getString("nombre");
                         String correo = doc.getString("correo");
                         String carnet = doc.getString("carnet");
-
-                        // Solo insertar si no existe ya en SQLite
                         if (localDb.obtenerUsuario(correo).getCount() == 0) {
                             localDb.registrarUsuario(nombre, correo,
                                     "firebase_sync", "estudiante", carnet);
                         }
+                    }
+                    if (callback != null) callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    // ══════════════════════════════════════════════
+    //  FIRESTORE — Descargar materias
+    // ══════════════════════════════════════════════
+    public static void descargarMaterias(android.content.Context context,
+                                         SyncCallback callback) {
+        DatabaseHelper localDb = new DatabaseHelper(context);
+        db.collection("materias")
+                .get()
+                .addOnSuccessListener(result -> {
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : result) {
+                        String nombre      = doc.getString("nombre");
+                        String codigo      = doc.getString("codigo");
+                        String descripcion = doc.getString("descripcion");
+                        Long docenteIdLong = doc.getLong("docente_id");
+                        int docenteId      = docenteIdLong != null ? docenteIdLong.intValue() : 0;
+                        int materiaId      = Integer.parseInt(doc.getId());
+
+                        android.database.Cursor c = localDb.getReadableDatabase()
+                                .rawQuery("SELECT id FROM materias WHERE id = ?",
+                                        new String[]{String.valueOf(materiaId)});
+                        if (c.getCount() == 0) {
+                            android.content.ContentValues v = new android.content.ContentValues();
+                            v.put("id",          materiaId);
+                            v.put("nombre",      nombre);
+                            v.put("codigo",      codigo);
+                            v.put("descripcion", descripcion);
+                            v.put("docente_id",  docenteId);
+                            localDb.getWritableDatabase().insert("materias", null, v);
+                        }
+                        c.close();
+                    }
+                    if (callback != null) callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+
+    // ══════════════════════════════════════════════
+    //  FIRESTORE — Descargar inscripciones por correo
+    // ══════════════════════════════════════════════
+    public static void descargarInscripcionesEstudiante(android.content.Context context,
+                                                        String correoEstudiante,
+                                                        SyncCallback callback) {
+        DatabaseHelper localDb = new DatabaseHelper(context);
+
+        db.collection("inscripciones")
+                .whereEqualTo("correo_estudiante", correoEstudiante)
+                .get()
+                .addOnSuccessListener(result -> {
+                    // Obtener ID local del estudiante por correo
+                    android.database.Cursor c = localDb.obtenerUsuario(correoEstudiante);
+                    if (!c.moveToFirst()) { c.close(); return; }
+                    int estudianteId = c.getInt(c.getColumnIndexOrThrow("id"));
+                    c.close();
+
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : result) {
+                        Long materiaIdLong = doc.getLong("materia_id");
+                        if (materiaIdLong == null) continue;
+                        int materiaId = materiaIdLong.intValue();
+
+                        if (!localDb.estaInscrito(estudianteId, materiaId)) {
+                            localDb.inscribirEstudiante(estudianteId, materiaId);
+                        }
+                    }
+                    if (callback != null) callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onError(e.getMessage());
+                });
+    }
+    // ══════════════════════════════════════════════
+//  FIRESTORE — Descargar sesiones de asistencia (docente)
+// ══════════════════════════════════════════════
+    public static void descargarAsistenciaDocente(android.content.Context context,
+                                                  SyncCallback callback) {
+        DatabaseHelper localDb = new DatabaseHelper(context);
+
+        db.collection("asistencia")
+                .get()
+                .addOnSuccessListener(result -> {
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : result) {
+                        Long materiaIdLong = doc.getLong("materia_id");
+                        String fecha       = doc.getString("fecha");
+                        String hora        = doc.getString("hora");
+                        Long totalLong     = doc.getLong("total");
+                        Long presentesLong = doc.getLong("presentes");
+
+                        if (materiaIdLong == null || fecha == null) continue;
+
+                        int materiaId  = materiaIdLong.intValue();
+                        int total      = totalLong != null ? totalLong.intValue() : 0;
+                        int presentes  = presentesLong != null ? presentesLong.intValue() : 0;
+
+                        android.database.Cursor c = localDb.getReadableDatabase()
+                                .rawQuery("SELECT id FROM asistencia WHERE materia_id=? AND fecha=?",
+                                        new String[]{String.valueOf(materiaId), fecha});
+                        if (c.getCount() == 0) {
+                            android.content.ContentValues v = new android.content.ContentValues();
+                            v.put("materia_id", materiaId);
+                            v.put("fecha",      fecha);
+                            v.put("hora",       hora);
+                            v.put("total",      total);
+                            v.put("presentes",  presentes);
+                            localDb.getWritableDatabase().insert("asistencia", null, v);
+                        }
+                        c.close();
                     }
                     if (callback != null) callback.onSuccess();
                 })

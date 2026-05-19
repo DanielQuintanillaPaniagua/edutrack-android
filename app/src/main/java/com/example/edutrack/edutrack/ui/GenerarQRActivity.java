@@ -149,8 +149,8 @@ public class GenerarQRActivity extends AppCompatActivity {
             tvTemporizador.setVisibility(View.VISIBLE);
 
             // Registrar en BD
-            long asistenciaId = dbHelper.registrarAsistencia(
-                    materiaSeleccionada.getId(), fecha, hora, 0, 0);
+            long asistenciaId = dbHelper.registrarObtenerAsistencia(
+                    materiaSeleccionada.getId(), fecha, hora);
 
 // ✅ Sincronizar con Firebase
             FirebaseManager.sincronizarAsistencia(

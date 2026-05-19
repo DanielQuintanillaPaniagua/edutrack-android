@@ -138,6 +138,25 @@ public class MateriasFragment extends Fragment implements MateriaAdapter.OnMater
 
     @Override
     public void onClickMateria(Materia materia) {
+        // Descargar estudiantes de Firebase primero, luego mostrar diálogo
+        FirebaseManager.descargarEstudiantes(requireContext(),
+                new FirebaseManager.SyncCallback() {
+                    @Override
+                    public void onSuccess() {
+                        requireActivity().runOnUiThread(() ->
+                                mostrarDialogoEstudiantes(materia));
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        // Si falla Firebase usar SQLite local
+                        requireActivity().runOnUiThread(() ->
+                                mostrarDialogoEstudiantes(materia));
+                    }
+                });
+    }
+
+    private void mostrarDialogoEstudiantes(Materia materia) {
         List<Usuario> estudiantes = dbHelper.obtenerTodosLosEstudiantes();
 
         if (estudiantes.isEmpty()) {
@@ -162,17 +181,13 @@ public class MateriasFragment extends Fragment implements MateriaAdapter.OnMater
                     int estudianteId = estudiantes.get(which).getId();
                     if (isChecked) {
                         dbHelper.inscribirEstudiante(estudianteId, materia.getId());
-
-                        // ✅ Firebase — dentro del lambda
-                        FirebaseManager.sincronizarInscripcion(estudianteId, materia.getId());
-
+                        // ✅ Pasar correo del estudiante
+                        FirebaseManager.sincronizarInscripcion(
+                                estudianteId,
+                                materia.getId(),
+                                estudiantes.get(which).getCorreo());
                         Toast.makeText(getContext(),
                                 nombres[which].split(" \\(")[0] + " inscrito ✅",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        dbHelper.desinscribirEstudiante(estudianteId, materia.getId());
-                        Toast.makeText(getContext(),
-                                nombres[which].split(" \\(")[0] + " desinscrito",
                                 Toast.LENGTH_SHORT).show();
                     }
                 })

@@ -8,9 +8,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.example.edutrack.edutrack.R;
 
+import com.example.edutrack.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
+import com.example.edutrack.edutrack.database.FirebaseManager;
 import com.example.edutrack.edutrack.models.Usuario;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
@@ -19,7 +20,6 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import com.example.edutrack.edutrack.database.FirebaseManager;
 
 public class EscanerQRActivity extends AppCompatActivity {
 
@@ -73,8 +73,6 @@ public class EscanerQRActivity extends AppCompatActivity {
     }
 
     private void procesarQR(String contenido) {
-        android.util.Log.d("QR_DEBUG", "Contenido: " + contenido);
-
         if (!contenido.startsWith("edutrack://asistencia/")) {
             Toast.makeText(this, "QR inválido", Toast.LENGTH_SHORT).show();
             yaProcesado = false;
@@ -89,7 +87,6 @@ public class EscanerQRActivity extends AppCompatActivity {
             String materiaNombre = partes[1].replace("_", " ");
             String fechaQR       = partes[2];
 
-            // Mismo locale que el docente
             String fechaHoy  = new SimpleDateFormat("yyyy-MM-dd",
                     new Locale("es", "ES")).format(new Date());
             String horaAhora = new SimpleDateFormat("HH:mm",
@@ -114,6 +111,9 @@ public class EscanerQRActivity extends AppCompatActivity {
                     estudiante.getId(), materiaId, fechaHoy, horaAhora);
 
             if (registrado) {
+                // ✅ Actualizar conteo en BD
+                db.actualizarConteoAsistencia(materiaId, fechaHoy);
+
                 // ✅ Sincronizar con Firebase
                 FirebaseManager.sincronizarAsistenciaEstudiante(
                         estudiante.getId(), materiaId, fechaHoy, horaAhora, "presente");

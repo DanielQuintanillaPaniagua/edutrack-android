@@ -529,4 +529,58 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rows > 0;
     }
+    public long registrarObtenerAsistencia(int materiaId, String fecha, String hora) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        Cursor c = db.rawQuery(
+                "SELECT id FROM asistencia WHERE materia_id=? AND fecha=?",
+                new String[]{String.valueOf(materiaId), fecha});
+
+        if (c.moveToFirst()) {
+            long id = c.getLong(0);
+            c.close();
+            db.close();
+            return id;
+        }
+        c.close();
+
+        ContentValues v = new ContentValues();
+        v.put("materia_id", materiaId);
+        v.put("fecha",      fecha);
+        v.put("hora",       hora);
+        v.put("total",      0);
+        v.put("presentes",  0);
+        long id = db.insert("asistencia", null, v);
+        db.close();
+        return id;
+    }
+    public void actualizarConteoAsistencia(int materiaId, String fecha) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Contar total de inscritos en la materia
+        Cursor total = db.rawQuery(
+                "SELECT COUNT(*) FROM inscripciones WHERE materia_id = ?",
+                new String[]{String.valueOf(materiaId)});
+        int totalEst = 0;
+        if (total.moveToFirst()) totalEst = total.getInt(0);
+        total.close();
+
+        // Contar presentes hoy
+        Cursor pres = db.rawQuery(
+                "SELECT COUNT(*) FROM asistencia_estudiante " +
+                        "WHERE materia_id=? AND fecha=? AND estado='presente'",
+                new String[]{String.valueOf(materiaId), fecha});
+        int presentes = 0;
+        if (pres.moveToFirst()) presentes = pres.getInt(0);
+        pres.close();
+
+        // Actualizar tabla asistencia
+        ContentValues v = new ContentValues();
+        v.put("total",    totalEst);
+        v.put("presentes", presentes);
+        db.update("asistencia", v,
+                "materia_id=? AND fecha=?",
+                new String[]{String.valueOf(materiaId), fecha});
+        db.close();
+    }
 }
