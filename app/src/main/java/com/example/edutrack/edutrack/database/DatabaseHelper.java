@@ -583,4 +583,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(materiaId), fecha});
         db.close();
     }
+    public int contarInscritosPorMateria(int materiaId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT COUNT(*) FROM inscripciones WHERE materia_id = ?",
+                new String[]{String.valueOf(materiaId)});
+        int count = 0;
+        if (c.moveToFirst()) count = c.getInt(0);
+        c.close();
+        db.close();
+        return count;
+    }
+    public void actualizarConteoSesion(int materiaId, String fecha,
+                                       int presentes, int total) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("presentes", presentes);
+        v.put("total", total);
+        db.update("asistencia", v,
+                "materia_id = ? AND fecha = ?",
+                new String[]{String.valueOf(materiaId), fecha});
+        db.close();
+    }
 }

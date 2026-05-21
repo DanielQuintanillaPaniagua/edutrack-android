@@ -78,15 +78,21 @@ public class FirebaseManager {
     public static void sincronizarAsistencia(long asistenciaId, int materiaId,
                                              String fecha, String hora,
                                              int total, int presentes) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("materia_id", materiaId);
-        data.put("fecha",      fecha);
-        data.put("hora",       hora);
-        data.put("total",      total);
-        data.put("presentes",  presentes);
-        db.collection("asistencia").document(String.valueOf(asistenciaId)).set(data);
+        String docId = String.valueOf(asistenciaId);
+        db.collection("asistencia").document(docId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("materia_id", materiaId);
+                        data.put("fecha",      fecha);
+                        data.put("hora",       hora);
+                        data.put("total",      total);
+                        data.put("presentes",  presentes);
+                        db.collection("asistencia").document(docId).set(data);
+                    }
+                });
     }
-
     // ══════════════════════════════════════════════
     //  FIRESTORE — Sincronizar asistencia estudiante
     // ══════════════════════════════════════════════
@@ -259,6 +265,13 @@ public class FirebaseManager {
                             v.put("total",      total);
                             v.put("presentes",  presentes);
                             localDb.getWritableDatabase().insert("asistencia", null, v);
+                        } else {
+                            android.content.ContentValues v = new android.content.ContentValues();
+                            v.put("total",     total);
+                            v.put("presentes", presentes);
+                            localDb.getWritableDatabase().update("asistencia", v,
+                                    "materia_id=? AND fecha=?",
+                                    new String[]{String.valueOf(materiaId), fecha});
                         }
                         c.close();
                     }

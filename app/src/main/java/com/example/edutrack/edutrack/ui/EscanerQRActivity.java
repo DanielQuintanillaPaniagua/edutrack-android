@@ -13,10 +13,13 @@ import com.example.edutrack.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.database.FirebaseManager;
 import com.example.edutrack.edutrack.models.Usuario;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-
+import com.google.firebase.firestore.FieldValue;
+import java.util.Map;
+import java.util.HashMap;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -45,6 +48,36 @@ public class EscanerQRActivity extends AppCompatActivity {
         } else {
             iniciarEscaner();
         }
+    }
+    // Añadir este método nuevo a EscanerQRActivity
+    private void actualizarConteoEnFirestore(int materiaId, String fecha) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+
+        // Contar inscritos localmente (el estudiante los tiene sincronizados)
+        int totalInscritos = db.contarInscritosPorMateria(materiaId);
+
+        firestore.collection("asistencia")
+                .whereEqualTo("materia_id", materiaId)
+                .whereEqualTo("fecha", fecha)
+                .get()
+                .addOnSuccessListener(query -> {
+                    if (!query.isEmpty()) {
+                        // El documento ya existe → solo incrementar presentes
+                        query.getDocuments().get(0).getReference()
+                                .update(
+                                        "presentes", FieldValue.increment(1),
+                                        "total", totalInscritos
+                                );
+                    } else {
+                        // No existe aún → crearlo (edge case: docente generó QR sin conexión)
+                        Map<String, Object> doc = new HashMap<>();
+                        doc.put("materia_id", materiaId);
+                        doc.put("fecha", fecha);
+                        doc.put("presentes", 1);
+                        doc.put("total", totalInscritos);
+                        firestore.collection("asistencia").add(doc);
+                    }
+                });
     }
 
     @Override
@@ -111,19 +144,16 @@ public class EscanerQRActivity extends AppCompatActivity {
                     estudiante.getId(), materiaId, fechaHoy, horaAhora);
 
             if (registrado) {
-                // ✅ Actualizar conteo en BD
                 db.actualizarConteoAsistencia(materiaId, fechaHoy);
 
-                // ✅ Sincronizar con Firebase
                 FirebaseManager.sincronizarAsistenciaEstudiante(
                         estudiante.getId(), materiaId, fechaHoy, horaAhora, "presente");
 
+                // ✅ NUEVO: actualizar conteo agregado en Firestore
+                actualizarConteoEnFirestore(materiaId, fechaHoy);
+
                 Toast.makeText(this,
                         "✅ Asistencia registrada en " + materiaNombre,
-                        Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this,
-                        "Ya registraste asistencia en " + materiaNombre + " hoy",
                         Toast.LENGTH_LONG).show();
             }
 
