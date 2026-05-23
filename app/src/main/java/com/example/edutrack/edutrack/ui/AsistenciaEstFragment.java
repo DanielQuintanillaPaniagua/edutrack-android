@@ -60,16 +60,19 @@ public class AsistenciaEstFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull VH h, int pos) {
             RegistroAsistencia r = lista.get(pos);
+            boolean ok = "presente".equalsIgnoreCase(r.estado); // ← ok se declara aquí
+
             h.tvNombre.setText(r.nombreMateria);
-            h.tvHora.setText("Hora: " + r.hora);
-            boolean ok = "presente".equalsIgnoreCase(r.estado);
+            h.tvHora.setText(ok ? "Hora: " + r.hora : "No asistió"); // ← debe estar aquí
             h.tvIcono.setText(ok ? "✅" : "❌");
             h.tvEstado.setText(ok ? "Presente" : "Ausente");
+            h.tvNombre.setTextColor(h.itemView.getContext().getColor(android.R.color.white));
+            h.tvHora.setTextColor(h.itemView.getContext().getColor(android.R.color.white));
             h.tvEstado.setTextColor(h.itemView.getContext().getColor(
-                    ok ? android.R.color.holo_green_dark
-                            : android.R.color.holo_red_dark));
+                    ok ? android.R.color.holo_green_dark : android.R.color.holo_red_dark));
+            h.itemView.setBackgroundResource(
+                    ok ? R.drawable.bg_card_presente : R.drawable.bg_card_ausente);
         }
-
         @Override public int getItemCount() { return lista.size(); }
 
         static class VH extends RecyclerView.ViewHolder {
@@ -88,9 +91,6 @@ public class AsistenciaEstFragment extends Fragment {
     private DatabaseHelper db;
     private int estudianteId;
 
-    // {nombre_materia, hora, fecha, estado}
-    private final List<String[]> historialRaw = new ArrayList<>();
-
     private CalendarView calendarAsistencia;
     private RecyclerView rvAsistenciaDia;
     private TextView tvFechaSeleccionada;
@@ -100,7 +100,8 @@ public class AsistenciaEstFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_asistencia_est_fragment, container, false);
+        return inflater.inflate(R.layout.activity_asistencia_est_fragment,
+                container, false);
     }
 
     @Override
@@ -112,7 +113,6 @@ public class AsistenciaEstFragment extends Fragment {
         if (sesion == null) return;
         estudianteId = sesion.getId();
 
-        // Bind — IDs de TU layout
         calendarAsistencia  = view.findViewById(R.id.calendarAsistencia);
         rvAsistenciaDia     = view.findViewById(R.id.rvAsistenciaDia);
         tvFechaSeleccionada = view.findViewById(R.id.tvFechaSeleccionada);
@@ -121,57 +121,43 @@ public class AsistenciaEstFragment extends Fragment {
         rvAsistenciaDia.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvAsistenciaDia.setAdapter(adapter);
 
-        // Cargar todos los registros
-        cargarHistorial();
-
         // Mostrar hoy por defecto
         String hoy = hoy();
         tvFechaSeleccionada.setText("📅 " + hoy);
-        filtrarPorFecha(hoy);
+        cargarPorFecha(hoy); // ← reemplaza filtrarPorFecha
 
-        // Cambio de fecha en calendario
         calendarAsistencia.setOnDateChangeListener((cal, year, month, day) -> {
-            // month es 0-based en CalendarView
             String fecha = String.format(Locale.getDefault(),
                     "%04d-%02d-%02d", year, month + 1, day);
             tvFechaSeleccionada.setText("📅 " + fecha);
-            filtrarPorFecha(fecha);
+            cargarPorFecha(fecha);
         });
     }
 
-    private void cargarHistorial() {
-        historialRaw.clear();
-
-        Cursor c = db.obtenerHistorialEstudiante(estudianteId);
-
+    // ✅ NUEVO: query directa con inasistencias incluidas
+    private void cargarPorFecha(String fecha) {
+        List<RegistroAsistencia> lista = new ArrayList<>();
+        Cursor c = db.obtenerAsistenciaConInasistencias(estudianteId, fecha);
         if (c != null) {
             while (c.moveToNext()) {
-                historialRaw.add(new String[]{
-                        c.getString(c.getColumnIndexOrThrow("materia_nombre")), // ← aquí
+                lista.add(new RegistroAsistencia(
+                        c.getString(c.getColumnIndexOrThrow("materia_nombre")),
                         c.getString(c.getColumnIndexOrThrow("hora")),
-                        c.getString(c.getColumnIndexOrThrow("fecha")),
                         c.getString(c.getColumnIndexOrThrow("estado"))
-                });
+                ));
             }
             c.close();
         }
-    }
-    private void filtrarPorFecha(String fecha) {
-        List<RegistroAsistencia> filtrados = new ArrayList<>();
-        for (String[] r : historialRaw)
-            if (fecha.equals(r[2]))
-                filtrados.add(new RegistroAsistencia(r[0], r[1], r[3]));
 
-        adapter.actualizar(filtrados);
+        adapter.actualizar(lista);
 
-        // Si no hay registros, el RecyclerView queda vacío —
-        // puedes agregar un tvVacio a tu layout si quieres mostrarlo
-        tvFechaSeleccionada.setText(filtrados.isEmpty()
-                ? "📅 " + fecha + " — sin registros"
+        tvFechaSeleccionada.setText(lista.isEmpty()
+                ? "📅 " + fecha + " — sin sesiones"
                 : "📅 " + fecha);
     }
 
     private String hoy() {
-        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        return new SimpleDateFormat("yyyy-MM-dd",
+                Locale.getDefault()).format(new Date());
     }
 }

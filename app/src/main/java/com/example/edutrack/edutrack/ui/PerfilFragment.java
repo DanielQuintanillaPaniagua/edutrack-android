@@ -22,6 +22,11 @@ import com.example.edutrack.edutrack.R;
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Usuario;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PerfilFragment extends Fragment {
@@ -36,9 +41,12 @@ public class PerfilFragment extends Fragment {
                     new ActivityResultContracts.GetContent(),
                     uri -> {
                         if (uri != null) {
-                            imgPerfil.setImageURI(uri);
-                            // Guardar URI en SharedPreferences
-                            prefs.edit().putString(KEY_FOTO, uri.toString()).apply();
+                            String rutaLocal = copiarFotoAlStorage(uri);
+                            if (rutaLocal != null) {
+                                imgPerfil.setImageBitmap(
+                                        android.graphics.BitmapFactory.decodeFile(rutaLocal));
+                                prefs.edit().putString(KEY_FOTO, rutaLocal).apply();
+                            }
                         }
                     });
 
@@ -74,9 +82,13 @@ public class PerfilFragment extends Fragment {
         }
 
         // ── Foto guardada ────────────────────────────────
-        String fotoUri = prefs.getString(KEY_FOTO, null);
-        if (fotoUri != null) {
-            imgPerfil.setImageURI(Uri.parse(fotoUri));
+        String rutaFoto = prefs.getString(KEY_FOTO, null);
+        if (rutaFoto != null) {
+            File fotoFile = new File(rutaFoto);
+            if (fotoFile.exists()) {
+                imgPerfil.setImageBitmap(
+                        android.graphics.BitmapFactory.decodeFile(rutaFoto));
+            }
         }
 
         // ── Click en foto → galería ──────────────────────
@@ -205,5 +217,25 @@ public class PerfilFragment extends Fragment {
                                 "🔔 Próximamente")
                 .setPositiveButton("Cerrar", null)
                 .show();
+    }
+    private String copiarFotoAlStorage(Uri uri) {
+        try {
+            InputStream input = requireContext()
+                    .getContentResolver().openInputStream(uri);
+            File destino = new File(requireContext().getFilesDir(), "foto_perfil.jpg");
+            OutputStream output = new FileOutputStream(destino);
+
+            byte[] buffer = new byte[4096];
+            int len;
+            while ((len = input.read(buffer)) != -1) {
+                output.write(buffer, 0, len);
+            }
+            input.close();
+            output.close();
+
+            return destino.getAbsolutePath();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

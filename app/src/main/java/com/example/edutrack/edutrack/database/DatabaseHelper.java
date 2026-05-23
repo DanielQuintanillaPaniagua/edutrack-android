@@ -605,4 +605,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(materiaId), fecha});
         db.close();
     }
-}
+
+    public Cursor obtenerAsistenciaConInasistencias(int estudianteId, String fecha) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(
+                "SELECT m.nombre as materia_nombre, " +
+                        "       COALESCE(ae.hora, '--') as hora, " +
+                        "       CASE WHEN ae.id IS NULL THEN 'ausente' ELSE 'presente' END as estado " +
+                        "FROM asistencia a " +
+                        "INNER JOIN materias m ON a.materia_id = m.id " +
+                        "INNER JOIN inscripciones i ON i.materia_id = m.id AND i.estudiante_id = ? " +
+                        "LEFT JOIN asistencia_estudiante ae " +
+                        "       ON ae.materia_id = a.materia_id " +
+                        "      AND ae.estudiante_id = ? " +
+                        "      AND ae.fecha = a.fecha " +
+                        "WHERE a.fecha = ? " +
+                        "ORDER BY m.nombre ASC",
+                new String[]{
+                        String.valueOf(estudianteId),
+                        String.valueOf(estudianteId),
+                        fecha
+                });
+    }
+    }

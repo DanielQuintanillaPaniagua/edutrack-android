@@ -41,7 +41,7 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-
+    implementation("androidx.biometric:biometric:1.1.0")
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore")

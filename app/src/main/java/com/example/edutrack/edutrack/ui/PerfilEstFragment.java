@@ -2,6 +2,7 @@ package com.example.edutrack.edutrack.ui;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,6 +22,12 @@ import com.example.edutrack.edutrack.R;
 
 import com.example.edutrack.edutrack.database.DatabaseHelper;
 import com.example.edutrack.edutrack.models.Usuario;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PerfilEstFragment extends Fragment {
@@ -28,6 +35,9 @@ public class PerfilEstFragment extends Fragment {
     private DatabaseHelper db;
     private Usuario usuario;
     private CircleImageView imgPerfil;
+    private SharedPreferences prefs;
+    private static final String KEY_FOTO_EST = "foto_perfil_est_uri";
+
 
     // Launcher para abrir galería
     private final ActivityResultLauncher<String> galeriaLauncher =
@@ -35,10 +45,14 @@ public class PerfilEstFragment extends Fragment {
                     new ActivityResultContracts.GetContent(),
                     uri -> {
                         if (uri != null) {
-                            imgPerfil.setImageURI(uri);
+                            String rutaLocal = copiarFotoAlStorage(uri);
+                            if (rutaLocal != null) {
+                                imgPerfil.setImageBitmap(
+                                        android.graphics.BitmapFactory.decodeFile(rutaLocal));
+                                prefs.edit().putString(KEY_FOTO_EST, rutaLocal).apply();
+                            }
                         }
                     });
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -48,10 +62,19 @@ public class PerfilEstFragment extends Fragment {
 
         db      = new DatabaseHelper(requireContext());
         usuario = db.obtenerUsuarioSesion();
+        prefs = requireActivity().getSharedPreferences("edutrack_prefs", 0);
+
 
         // Bind views
         imgPerfil = view.findViewById(R.id.imgPerfilEst);
-
+        String rutaFoto = prefs.getString(KEY_FOTO_EST, null);
+        if (rutaFoto != null) {
+            File fotoFile = new File(rutaFoto);
+            if (fotoFile.exists()) {
+                imgPerfil.setImageBitmap(
+                        android.graphics.BitmapFactory.decodeFile(rutaFoto));
+            }
+        }
         if (usuario != null) {
             ((TextView) view.findViewById(R.id.tvNombreEst)).setText(usuario.getNombre());
             ((TextView) view.findViewById(R.id.tvCorreoEst)).setText(usuario.getCorreo());
@@ -144,5 +167,25 @@ public class PerfilEstFragment extends Fragment {
     private void proximamente() {
         Toast.makeText(requireContext(),
                 "🚧 En desarrollo — próximamente", Toast.LENGTH_SHORT).show();
+    }
+    private String copiarFotoAlStorage(Uri uri) {
+        try {
+            InputStream input = requireContext()
+                    .getContentResolver().openInputStream(uri);
+            File destino = new File(requireContext().getFilesDir(), "foto_perfil_est.jpg");
+            OutputStream output = new FileOutputStream(destino);
+
+            byte[] buffer = new byte[4096];
+            int len;
+            while ((len = input.read(buffer)) != -1) {
+                output.write(buffer, 0, len);
+            }
+            input.close();
+            output.close();
+
+            return destino.getAbsolutePath(); // ← ruta interna permanente
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
