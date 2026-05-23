@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0D1B2A"
+    android:gravity="center_horizontal"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Generar QR de asistencia"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Selector de materia -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Selecciona la materia:"
+        android:textColor="#90CAF9"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinnerMaterias"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_spinner"
+        android:paddingHorizontal="12dp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Botón generar -->
+    <Button
+        android:id="@+id/btnGenerarQR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generar QR"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Info de sesión -->
+    <TextView
+        android:id="@+id/tvInfoSesion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#90CAF9"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"/>
+
+    <!-- QR generado -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardQR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <ImageView
+            android:id="@+id/imgQR"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
+            android:padding="16dp"
+            android:scaleType="fitCenter"/>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Temporizador -->
+    <TextView
+        android:id="@+id/tvTemporizador"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF5252"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"/>
+
+    <!-- Botón cerrar -->
+    <Button
+        android:id="@+id/btnCerrar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cerrar"
+        android:backgroundTint="#1A2A3A"
+        android:textColor="#FF5252"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
