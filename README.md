@@ -49,7 +49,6 @@ Generación de QR
 <p align="center">
   <img src="screenshots/screenshot_qr.png" width="250"/>
   &nbsp;&nbsp;
-  <img src="screenshots/screenshot_perfil.png" width="250"/>
 </p>
 Dashboard Estudiante
 <p align="center">
@@ -58,6 +57,9 @@ Dashboard Estudiante
   <img src="screenshots/screenshot_asistencia_est.png" width="250"/>
   &nbsp;&nbsp;
   <img src="screenshots/screenshot_alertas.png" width="250"/>
+  &nbsp;&nbsp;
+    <img src="screenshots/screenshot_perfil.png" width="250"/>
+
 </p>
 
 🛠️ Tecnologías utilizadas
