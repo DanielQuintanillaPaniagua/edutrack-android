@@ -125,13 +125,26 @@ public class EscanerQRActivity extends AppCompatActivity {
             String horaAhora = new SimpleDateFormat("HH:mm",
                     new Locale("es", "ES")).format(new Date());
 
-            if (!fechaQR.equals(fechaHoy)) {
-                Toast.makeText(this, "QR expirado — fecha: " + fechaQR +
-                        " hoy: " + fechaHoy, Toast.LENGTH_LONG).show();
-                yaProcesado = false;
-                return;
-            }
+            if (partes.length >= 6) {
+                long timestampQR = Long.parseLong(partes[5]);
+                long ahora = System.currentTimeMillis();
+                long diferencia = ahora - timestampQR;
+                long cincoMinutos = 5 * 60 * 1000;
 
+                if (diferencia > cincoMinutos || diferencia < -cincoMinutos) {
+                    Toast.makeText(this, "❌ QR expirado", Toast.LENGTH_LONG).show();
+                    yaProcesado = false;
+                    return;
+                }
+            } else {
+                String fechaHoyTemp = new SimpleDateFormat("yyyy-MM-dd",
+                        new Locale("es", "ES")).format(new Date());
+                if (!fechaQR.equals(fechaHoyTemp)) {
+                    Toast.makeText(this, "❌ QR expirado", Toast.LENGTH_LONG).show();
+                    yaProcesado = false;
+                    return;
+                }
+            }
             Usuario estudiante = db.obtenerUsuarioSesion();
             if (estudiante == null) {
                 Toast.makeText(this, "Error: no hay sesión activa",
