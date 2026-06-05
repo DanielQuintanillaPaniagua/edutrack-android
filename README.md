@@ -133,7 +133,11 @@ Después de iniciar sesión por primera vez, la app guarda la sesión. Al volver
 
 👨‍💻 Desarrollado por
 Daniel Quintanilla
-Estudiante de Ingeniería en Sistemas — Universidad Gerardo Barrios (UGB)
+David Rivas
+Abigail Vásquez
+Jenifer Renderos
+Arely Sorto
+Estudiantes de Ingeniería en Sistemas — Universidad Gerardo Barrios (UGB)
 El Salvador, 2026
 
 📄 Licencia
