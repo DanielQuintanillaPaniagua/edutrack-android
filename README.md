@@ -1,72 +1,154 @@
-📚 EduTrack — Control de Asistencia Universitaria
-
-Aplicación Android para el control de asistencia mediante códigos QR, desarrollada con Java, SQLite y Firebase.
-
-
-📋 Descripción
-EduTrack es una aplicación móvil Android que permite a docentes y estudiantes gestionar la asistencia universitaria de forma digital. Los docentes generan códigos QR por sesión, y los estudiantes los escanean para registrar su presencia. Toda la información se sincroniza en tiempo real con Firebase Firestore.
-
-✨ Características
-👨‍🏫 Rol Docente
-
-Gestión de materias (crear, editar, eliminar)
-Generación de QR por sesión con temporizador de 5 minutos
-Historial de asistencias con presentes/total por sesión
-Reportes visuales con gráfico de barras (MPAndroidChart)
-Inscripción de estudiantes a materias
-Perfil con foto, información personal y cambio de contraseña
-
-👨‍🎓 Rol Estudiante
-
-Escaneo de QR para registrar asistencia
-Calendario de asistencias con tarjetas verde (Presente) y roja (Ausente)
-Porcentaje de asistencia por materia
-Alertas cuando la asistencia baja del 80%
-Perfil con foto, información personal y cambio de contraseña
-
-🔐 Seguridad
-
-Autenticación con Firebase Auth (correo y contraseña)
-Fallback a SQLite local sin conexión
-Login con huella dactilar (BiometricPrompt)
-QR con validación de fecha para evitar reutilización
-
-
-📸 Screenshots
-Pantalla de inicio de sesión
 <p align="center">
-  <img src="screenshots/screenshot_login.png" width="250"/>
-</p>
-Dashboard Docente
-<p align="center">
-  <img src="screenshots/screenshot_dashboard_docente.png" width="250"/>
-  &nbsp;&nbsp;
-  <img src="screenshots/screenshot_materias.png" width="250"/>
-  &nbsp;&nbsp;
-  <img src="screenshots/screenshot_reportes.png" width="250"/>
-</p>
-Generación de QR
-<p align="center">
-  <img src="screenshots/screenshot_qr.png" width="250"/>
-  &nbsp;&nbsp;
-</p>
-Dashboard Estudiante
-<p align="center">
-  <img src="screenshots/screenshot_inicio_est.png" width="250"/>
-  &nbsp;&nbsp;
-  <img src="screenshots/screenshot_asistencia_est.png" width="250"/>
-  &nbsp;&nbsp;
-  <img src="screenshots/screenshot_alertas.png" width="250"/>
-  &nbsp;&nbsp;
-    <img src="screenshots/screenshot_perfil.png" width="250"/>
-
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0a0a,50:2196F3,100:0a0a0a&height=200&section=header&text=EduTrack&fontSize=50&fontColor=ffffff&desc=Control%20de%20Asistencia%20Universitaria&descSize=20&descAlignY=75&animation=fadeIn"/>
 </p>
 
-🛠️ Tecnologías utilizadas
-TecnologíaUsoJavaLenguaje principalSQLiteBase de datos localFirebase AuthAutenticación de usuariosFirebase FirestoreSincronización en la nubeZXing (zxing-android-embedded)Generación y escaneo de QRMPAndroidChartGráficos de reportesCircleImageViewFoto de perfil circularAndroidX BiometricLogin con huella dactilar
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Language-Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Firebase-Firestore%20%7C%20Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black"/>
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/UGB-El%20Salvador%20🇸🇻-green?style=for-the-badge"/>
+</p>
 
-📦 Dependencias
-kotlinimplementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+<p align="center">
+  <b>Aplicación Android para gestión de asistencia universitaria mediante códigos QR</b><br/>
+  Desarrollada con Java · SQLite · Firebase · ZXing · Biometría
+</p>
+
+---
+
+## 📋 Descripción
+
+**EduTrack** es una aplicación móvil Android diseñada para digitalizar el control de asistencia en entornos universitarios. Los **docentes** generan códigos QR por sesión con un temporizador de validez, y los **estudiantes** los escanean para registrar su presencia automáticamente. Todo se sincroniza en tiempo real con Firebase Firestore, con fallback a SQLite local sin conexión.
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/screenshot_login.png" width="200"/>
+</p>
+
+**Dashboard Docente**
+
+<p align="center">
+  <img src="screenshots/screenshot_dashboard_docente.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_materias.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_reportes.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_qr.png" width="200"/>
+</p>
+
+**Dashboard Estudiante**
+
+<p align="center">
+  <img src="screenshots/screenshot_inicio_est.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_asistencia_est.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_alertas.png" width="200"/>
+  &nbsp;
+  <img src="screenshots/screenshot_perfil.png" width="200"/>
+</p>
+
+---
+
+## ✨ Características
+
+<table>
+<tr>
+<td width="50%">
+
+### 👨‍🏫 Rol Docente
+
+- 📚 Gestión de materias (crear, editar, eliminar)
+- 📷 Generación de QR por sesión con temporizador de **5 minutos**
+- 📊 Historial de asistencias con conteo presentes/total
+- 📈 Reportes visuales con gráfico de barras (MPAndroidChart)
+- 👥 Inscripción de estudiantes a materias
+- 🖼️ Perfil con foto, info personal y cambio de contraseña
+
+</td>
+<td width="50%">
+
+### 👨‍🎓 Rol Estudiante
+
+- 📷 Escaneo de QR para registrar asistencia
+- 📅 Calendario con tarjetas **verde** (Presente) / **roja** (Ausente)
+- 📊 Porcentaje de asistencia por materia
+- ⚠️ Alertas cuando la asistencia baja del **80%**
+- 🖼️ Perfil con foto, info personal y cambio de contraseña
+
+</td>
+</tr>
+</table>
+
+### 🔐 Seguridad
+
+| Feature | Implementación |
+|---|---|
+| Autenticación | Firebase Auth (correo + contraseña) |
+| Offline | Fallback automático a SQLite local |
+| Biometría | Login con huella dactilar (BiometricPrompt) |
+| QR seguro | Validación de fecha para evitar reutilización |
+
+---
+
+## 🛠️ Tech Stack
+
+<p align="center">
+
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+
+</p>
+
+| Tecnología | Uso |
+|---|---|
+| **Java** | Lenguaje principal |
+| **SQLite** (DB_VERSION 8) | Base de datos local offline |
+| **Firebase Auth** | Autenticación de usuarios |
+| **Firebase Firestore** | Sincronización en la nube |
+| **ZXing** (zxing-android-embedded) | Generación y escaneo de QR |
+| **MPAndroidChart** | Gráficos de reportes |
+| **CircleImageView** | Foto de perfil circular |
+| **AndroidX Biometric** | Login con huella dactilar |
+
+---
+
+## 🗄️ Base de datos
+
+### SQLite (local — offline)
+
+| Tabla | Descripción |
+|---|---|
+| `sesion` | Sesión activa del usuario |
+| `usuarios` | Docentes y estudiantes registrados |
+| `materias` | Materias por docente |
+| `asistencia` | Sesiones QR generadas por el docente |
+| `inscripciones` | Estudiantes inscritos por materia |
+| `asistencia_estudiante` | Registro individual de asistencia |
+
+### Firebase Firestore (nube — tiempo real)
+
+| Colección | Descripción |
+|---|---|
+| `usuarios` | Datos de usuario sincronizados |
+| `materias` | Materias sincronizadas entre dispositivos |
+| `asistencia` | Sesiones con conteo de presentes/total |
+| `asistencia_estudiante` | Registros individuales de escaneo |
+| `inscripciones` | Inscripciones identificadas por correo |
+
+---
+
+## 📦 Dependencias
+
+```kotlin
+implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
 implementation("com.google.firebase:firebase-firestore")
 implementation("com.google.firebase:firebase-auth")
 implementation("androidx.recyclerview:recyclerview:1.3.2")
@@ -75,70 +157,85 @@ implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 implementation("de.hdodenhof:circleimageview:3.1.0")
 implementation("androidx.biometric:biometric:1.1.0")
+```
 
-🗄️ Estructura de la base de datos
-SQLite (local) — DB_VERSION 8
-TablaDescripciónsesionSesión activa del usuariousuariosDocentes y estudiantes registradosmateriasMaterias por docenteasistenciaSesiones QR generadas por el docenteinscripcionesEstudiantes inscritos por materiaasistencia_estudianteRegistro individual de asistencia
-Firebase Firestore (nube)
-ColecciónDescripciónusuariosDatos de usuario sincronizadosmateriasMaterias sincronizadas entre dispositivosasistenciaSesiones con conteo de presentes/totalasistencia_estudianteRegistros individuales de escaneoinscripcionesInscripciones identificadas por correo
+---
 
-🚀 Instalación
-Requisitos
+## 🚀 Instalación
 
-Android Studio Hedgehog o superior
-Android SDK 26+
-Cuenta de Firebase con proyecto configurado
+**Requisitos:**
+- Android Studio Hedgehog o superior
+- Android SDK 26+
+- Cuenta de Firebase con proyecto configurado
 
-Pasos
+**Pasos:**
 
-Clona el repositorio:
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/DanielQuintanillaPaniagua/edutrack-android.git
 
-bashgit clone https://github.com/tu-usuario/edutrack-android.git
+# 2. Abrir en Android Studio
+```
 
-Abre el proyecto en Android Studio.
-Agrega tu archivo google-services.json en la carpeta app/:
-
+```
+# 3. Agregar google-services.json en app/
 edutrack-android/
   app/
     google-services.json  ← aquí
+```
 
-Configura Firebase:
+```
+# 4. Configurar Firebase Console
+  ✅ Activar Authentication → Correo y contraseña
+  ✅ Activar Firestore Database
 
-Activa Authentication con correo y contraseña
-Activa Firestore Database
+# 5. Sync Gradle → Run
+```
 
+---
 
-Sincroniza Gradle y ejecuta la app.
+## 📱 Uso rápido
 
+**Como Docente:**
+1. Registrate seleccionando rol **Docente**
+2. Creá tus materias en la pestaña Materias
+3. Inscribí estudiantes a tus materias
+4. Generá un QR desde **Generar QR** — válido por 5 minutos
+5. Consultá el historial y reportes de asistencia
 
-📱 Uso
-Como Docente
+**Como Estudiante:**
+1. Registrate seleccionando rol **Estudiante**
+2. El docente te inscribe a las materias
+3. Escaneá el QR para registrar tu asistencia
+4. Consultá tu calendario de asistencias y alertas de bajo rendimiento
 
-Regístrate o inicia sesión seleccionando el rol Docente
-Crea tus materias en la pestaña Materias
-Inscribe estudiantes a tus materias
-Genera un QR desde el botón Generar QR — válido por 5 minutos
-Consulta el historial y reportes de asistencia
+> **💡 Biometría:** Después del primer login la app guarda la sesión. Al volver a abrir, si el dispositivo tiene huella registrada, se activa automáticamente el prompt biométrico.
 
-Como Estudiante
+---
 
-Regístrate o inicia sesión seleccionando el rol Estudiante
-El docente debe inscribirte a las materias
-Escanea el QR del docente para registrar tu asistencia
-Consulta tu calendario de asistencias y alertas
+## 👨‍💻 Equipo de desarrollo
 
+<table>
+<tr>
+<td align="center"><b>Daniel Quintanilla</b></td>
+<td align="center"><b>David Rivas</b></td>
+<td align="center"><b>Abigail Vásquez</b></td>
+<td align="center"><b>Jenifer Renderos</b></td>
+<td align="center"><b>Arely Sorto</b></td>
+</tr>
+</table>
 
-🔐 Login con huella dactilar
-Después de iniciar sesión por primera vez, la app guarda la sesión. Al volver a abrir la aplicación, si el dispositivo tiene una huella registrada en el sistema, se mostrará automáticamente el prompt de autenticación biométrica.
+> Estudiantes de Ingeniería en Sistemas — **Universidad Gerardo Barrios (UGB)**
+> El Salvador, 2026 🇸🇻
 
-👨‍💻 Desarrollado por
-Daniel Quintanilla
-David Rivas
-Abigail Vásquez
-Jenifer Renderos
-Arely Sorto
-Estudiantes de Ingeniería en Sistemas — Universidad Gerardo Barrios (UGB)
-El Salvador, 2026
+---
 
-📄 Licencia
-mit
+## 📄 Licencia
+
+MIT License — libre de usar, modificar y distribuir con atribución.
+
+---
+
+<p align="center">
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a0a0a,50:2196F3,100:0a0a0a&height=120&section=footer"/>
+</p>
